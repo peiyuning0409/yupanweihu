@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>飞牛 NAS · 维护面板</title>
+    <!-- 字体 & 图标库 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        /* ----- 全局重置 & 背景 ----- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0b0e14;
+            background-image:
+                radial-gradient(ellipse at 20% 50%, rgba(16, 88, 200, 0.20) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(0, 200, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 80%, rgba(100, 0, 255, 0.10) 0%, transparent 50%),
+                linear-gradient(145deg, #0b0e14 0%, #141a24 100%);
+            padding: 20px;
+        }
+
+        /* ----- 主卡片（玻璃态） ----- */
+        .dashboard {
+            max-width: 860px;
+            width: 100%;
+            background: rgba(18, 24, 34, 0.70);
+            backdrop-filter: blur(14px) saturate(1.3);
+            -webkit-backdrop-filter: blur(14px) saturate(1.3);
+            border-radius: 48px;
+            padding: 40px 40px 48px;
+            box-shadow:
+                0 30px 60px rgba(0, 0, 0, 0.70),
+                0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+                0 0 0 1px rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        /* ----- 头部 ----- */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .header-icon {
+            width: 54px;
+            height: 54px;
+            background: linear-gradient(145deg, #1e8aff, #0055dd);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: #fff;
+            box-shadow: 0 12px 28px -6px rgba(0, 80, 255, 0.35);
+            flex-shrink: 0;
+            cursor: default;
+            transition: transform 0.2s;
+        }
+        .header-icon:hover {
+            transform: scale(1.02);
+        }
+
+        .header-text h1 {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            color: #f0f4ff;
+            line-height: 1.2;
+        }
+
+        .header-text .sub {
+            font-size: 14px;
+            font-weight: 500;
+            color: rgba(180, 200, 255, 0.65);
+            letter-spacing: 0.3px;
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* ----- 凭证卡片 ----- */
+        .credential-card {
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 24px;
+            padding: 18px 24px;
+            margin-bottom: 36px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(4px);
+        }
+
+        .credential-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+            font-weight: 500;
+            color: rgba(220, 235, 255, 0.85);
+        }
+
+        .credential-item i {
+            width: 28px;
+            height: 28px;
+            background: rgba(30, 138, 255, 0.15);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            color: #5b9aff;
+            flex-shrink: 0;
+        }
+
+        .credential-item .label {
+            color: rgba(180, 200, 255, 0.5);
+            font-weight: 400;
+            margin-right: 2px;
+        }
+
+        .credential-item .value {
+            color: #eef4ff;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            font-family: 'Inter', monospace;
+        }
+
+        .copy-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: none;
+            color: rgba(200, 215, 255, 0.5);
+            padding: 6px 12px;
+            border-radius: 40px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: inherit;
+            font-weight: 500;
+            border: 1px solid transparent;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.10);
+            color: #b0cbff;
+            border-color: rgba(255, 255, 255, 0.06);
+        }
+
+        /* ----- 功能网格（四卡片） ----- */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            margin-top: 4px;
+        }
+
+        .function-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 28px;
+            padding: 24px 22px 26px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.25s ease;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(4px);
+            cursor: pointer;
+        }
+
+        .function-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            border-radius: 28px 28px 0 0;
+            opacity: 0.6;
+            transition: opacity 0.3s;
+        }
+
+        .function-card:hover {
+            background: rgba(255, 255, 255, 0.07);
+            border-color: rgba(255, 255, 255, 0.10);
+            transform: translateY(-3px);
+            box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.6);
+        }
+
+        .function-card:hover::before {
+            opacity: 1;
+        }
+
+        /* 各自顶部色条 */
+        .card-cloudflare::before {
+            background: linear-gradient(90deg, #f38020, #faa51a);
+        }
+        .card-domain::before {
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+        }
+        .card-github::before {
+            background: linear-gradient(90deg, #6e7681, #30363d);
+        }
+        .card-fnnas::before {
+            background: linear-gradient(90deg, #00b4d8, #0077b6);
+        }
+
+        .card-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .card-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        .card-cloudflare .card-icon {
+            background: linear-gradient(145deg, #f38020, #d96c1a);
+            box-shadow: 0 8px 20px -6px rgba(243, 128, 32, 0.30);
+        }
+        .card-domain .card-icon {
+            background: linear-gradient(145deg, #4f7cff, #6d4bff);
+            box-shadow: 0 8px 20px -6px rgba(79, 124, 255, 0.30);
+        }
+        .card-github .card-icon {
+            background: linear-gradient(145deg, #6e7681, #30363d);
+            box-shadow: 0 8px 20px -6px rgba(110, 118, 129, 0.30);
+        }
+        .card-fnnas .card-icon {
+            background: linear-gradient(145deg, #00b4d8, #0077b6);
+            box-shadow: 0 8px 20px -6px rgba(0, 180, 216, 0.30);
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.06);
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            color: rgba(200, 215, 255, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #f0f4ff;
+            letter-spacing: -0.3px;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .card-title i {
+            font-size: 16px;
+            color: rgba(180, 200, 255, 0.3);
+        }
+
+        .card-desc {
+            font-size: 14px;
+            color: rgba(180, 200, 255, 0.6);
+            line-height: 1.5;
+            margin-bottom: 14px;
+            flex: 1;
+        }
+
+        .card-desc strong {
+            color: rgba(220, 235, 255, 0.8);
+            font-weight: 600;
+        }
+
+        .card-desc .github-account {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2px 10px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #c9d1d9;
+            margin-top: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        /* 延期标签（仅域名管理卡片） */
+        .renew-badge {
+            background: rgba(139, 92, 246, 0.15);
+            border: 1px solid rgba(139, 92, 246, 0.15);
+            color: #b8a5ff;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 14px;
+            border-radius: 40px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.2px;
+            margin-top: 6px;
+        }
+
+        .card-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: auto;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .card-meta .tag {
+            font-size: 12px;
+            font-weight: 500;
+            color: rgba(180, 200, 255, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.03);
+            padding: 4px 14px 4px 10px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }
+
+        .card-meta .tag i {
+            font-size: 12px;
+        }
+
+        .card-meta .url {
+            font-size: 12px;
+            color: rgba(160, 185, 255, 0.35);
+            font-family: 'Inter', monospace;
+            letter-spacing: 0.2px;
+            word-break: break-all;
+            margin-left: auto;
+        }
+
+        /* ----- 底部小字 ----- */
+        .footer-note {
+            margin-top: 32px;
+            text-align: center;
+            font-size: 13px;
+            color: rgba(160, 185, 255, 0.25);
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .footer-note i {
+            font-size: 12px;
+            opacity: 0.5;
+        }
+
+        .footer-note span {
+            background: rgba(255, 255, 255, 0.02);
+            padding: 2px 12px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.02);
+        }
+
+        /* ----- Toast 提示 ----- */
+        .toast-message {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: rgba(16, 24, 40, 0.88);
+            backdrop-filter: blur(16px);
+            padding: 12px 28px;
+            border-radius: 60px;
+            color: #d0e0ff;
+            font-size: 14px;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            pointer-events: none;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 999;
+        }
+
+        .toast-message.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast-message i {
+            color: #5b9aff;
+        }
+
+        /* ----- 响应式 ----- */
+        @media (max-width: 700px) {
+            .dashboard {
+                padding: 24px 18px 32px;
+                border-radius: 32px;
+            }
+            .grid-2 {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .credential-card {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            .credential-item {
+                justify-content: space-between;
+            }
+            .header-text h1 {
+                font-size: 20px;
+            }
+            .card-title {
+                font-size: 18px;
+            }
+            .function-card {
+                padding: 20px 18px 22px;
+            }
+            .card-meta .url {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .dashboard {
+                padding: 18px 12px 24px;
+                border-radius: 24px;
+            }
+            .credential-item {
+                font-size: 13px;
+                flex-wrap: wrap;
+            }
+            .copy-btn {
+                padding: 4px 10px;
+                font-size: 11px;
+            }
+        }
+
+        /* 入场动画 */
+        .function-card {
+            animation: cardFadeUp 0.5s ease both;
+        }
+        .function-card:nth-child(2) {
+            animation-delay: 0.08s;
+        }
+        .function-card:nth-child(3) {
+            animation-delay: 0.16s;
+        }
+        .function-card:nth-child(4) {
+            animation-delay: 0.24s;
+        }
+
+        @keyframes cardFadeUp {
+            0% {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard" role="main">
+
+        <!-- 头部 -->
+        <div class="header">
+            <div class="header-icon" title="双击复制完整凭证（彩蛋）">
+                <i class="fas fa-server"></i>
+            </div>
+            <div class="header-text">
+                <h1>飞牛 NAS · 维护面板</h1>
+                <div class="sub">
+                    <i class="fas fa-circle" style="color: #4ade80; font-size: 8px;"></i>
+                    系统在线 · 快捷导航
+                </div>
+            </div>
+        </div>
+
+        <!-- 凭证卡片 -->
+        <div class="credential-card">
+            <div class="credential-item">
+                <i class="fas fa-user"></i>
+                <span class="label">账户</span>
+                <span class="value" id="usernameDisplay">peiyuning</span>
+                <button class="copy-btn" onclick="copyText('peiyuning', '账户')" aria-label="复制账户">
+                    <i class="fas fa-copy"></i> 复制
+                </button>
+            </div>
+            <div class="credential-item">
+                <i class="fas fa-lock"></i>
+                <span class="label">密码</span>
+                <span class="value" id="passwordDisplay">peiyuning1213</span>
+                <button class="copy-btn" onclick="copyText('peiyuning1213', '密码')" aria-label="复制密码">
+                    <i class="fas fa-copy"></i> 复制
+                </button>
+            </div>
+        </div>
+
+        <!-- 四个功能卡片（2×2） -->
+        <div class="grid-2">
+
+            <!-- 卡片 1：Cloudflare · 内网穿透 -->
+            <a href="https://dash.cloudflare.com" target="_blank" rel="noopener noreferrer" class="function-card card-cloudflare">
+                <div class="card-top">
+                    <div class="card-icon">
+                        <i class="fas fa-cloud"></i>
+                    </div>
+                    <span class="badge">内网穿透</span>
+                </div>
+                <div class="card-title">
+                    Cloudflare
+                    <i class="fas fa-arrow-up-right-from-square"></i>
+                </div>
+                <div class="card-desc">
+                    通过 <strong>Cloudflare Tunnel</strong> 安全暴露本地服务，无需公网 IP，实现内网穿透。
+                </div>
+                <div class="card-meta">
+                    <span class="tag"><i class="fas fa-rocket"></i> 零信任接入</span>
+                    <span class="url">dash.cloudflare.com</span>
+                </div>
+            </a>
+
+            <!-- 卡片 2：二级域名 · 180天延期 -->
+            <a href="https://dash.domain.digitalplat.org" target="_blank" rel="noopener noreferrer" class="function-card card-domain">
+                <div class="card-top">
+                    <div class="card-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <span class="badge">二级域名</span>
+                </div>
+                <div class="card-title">
+                    域名管理
+                    <i class="fas fa-arrow-up-right-from-square"></i>
+                </div>
+                <div class="card-desc">
+                    管理您的 <strong>二级域名</strong> 解析，定期维护域名状态。
+                    <span class="renew-badge">
+                        <i class="fas fa-rotate-right"></i> 每 180 天更新延期
+                    </span>
+                </div>
+                <div class="card-meta">
+                    <span class="tag"><i class="fas fa-calendar-check"></i> 延期提醒</span>
+                    <span class="url">dash.domain.digitalplat.org</span>
+                </div>
+            </a>
+
+            <!-- 卡片 3：GitHub · 个人网站托管 -->
+            <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="function-card card-github">
+                <div class="card-top">
+                    <div class="card-icon">
+                        <i class="fab fa-github"></i>
+                    </div>
+                    <span class="badge">代码托管</span>
+                </div>
+                <div class="card-title">
+                    GitHub
+                    <i class="fas fa-arrow-up-right-from-square"></i>
+                </div>
+                <div class="card-desc">
+                    个人网站、项目代码的聚集托管点。
+                    <div class="github-account">
+                        <i class="fas fa-user" style="margin-right: 4px;"></i> peiyuning0409 · 密码同主账户
+                    </div>
+                </div>
+                <div class="card-meta">
+                    <span class="tag"><i class="fas fa-code"></i> 仓库管理</span>
+                    <span class="url">github.com</span>
+                </div>
+            </a>
+
+            <!-- 卡片 4：飞牛内网穿透版 NAS -->
+            <a href="https://yupan.peiyuningyupan.qzz.io/" target="_blank" rel="noopener noreferrer" class="function-card card-fnnas">
+                <div class="card-top">
+                    <div class="card-icon">
+                        <i class="fas fa-network-wired"></i>
+                    </div>
+                    <span class="badge">穿透 NAS</span>
+                </div>
+                <div class="card-title">
+                    飞牛 NAS (穿透)
+                    <i class="fas fa-arrow-up-right-from-square"></i>
+                </div>
+                <div class="card-desc">
+                    通过内网穿透访问的 <strong>飞牛 NAS</strong> 个人云盘，随时随地存取文件。
+                </div>
+                <div class="card-meta">
+                    <span class="tag"><i class="fas fa-external-link-alt"></i> 穿透访问</span>
+                    <span class="url">yupan.peiyuningyupan.qzz.io</span>
+                </div>
+            </a>
+
+        </div>
+
+        <!-- 底部信息 -->
+        <div class="footer-note">
+            <i class="fas fa-circle" style="font-size: 6px; color: rgba(255,255,255,0.08);"></i>
+            <span>飞牛 NAS · 维护面板 v2.0</span>
+            <i class="fas fa-circle" style="font-size: 6px; color: rgba(255,255,255,0.08);"></i>
+            <span>点击卡片直达控制台</span>
+        </div>
+
+    </div>
+
+    <!-- Toast 容器 -->
+    <div id="toast" class="toast-message">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastText">已复制</span>
+    </div>
+
+    <script>
+        // ========== 复制功能 ==========
+        let toastTimer = null;
+
+        function copyText(text, label) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast(`${label} 已复制到剪贴板`);
+                }).catch(() => {
+                    fallbackCopy(text, label);
+                });
+            } else {
+                fallbackCopy(text, label);
+            }
+        }
+
+        function fallbackCopy(text, label) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                showToast(`${label} 已复制到剪贴板`);
+            } catch (err) {
+                showToast(`复制失败，请手动复制`, true);
+            }
+            document.body.removeChild(textarea);
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastText = document.getElementById('toastText');
+            toastText.textContent = message;
+            toast.classList.add('show');
+
+            if (isError) {
+                toast.style.borderColor = 'rgba(255,100,100,0.2)';
+                toast.querySelector('i').className = 'fas fa-exclamation-circle';
+                toast.querySelector('i').style.color = '#ff6b6b';
+            } else {
+                toast.style.borderColor = 'rgba(255,255,255,0.06)';
+                toast.querySelector('i').className = 'fas fa-check-circle';
+                toast.querySelector('i').style.color = '#5b9aff';
+            }
+
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+                toastTimer = null;
+            }, 2800);
+        }
+
+        // ========== 彩蛋：双击头部图标复制完整凭证 ==========
+        document.querySelector('.header-icon')?.addEventListener('dblclick', function() {
+            const full = '账户: peiyuning\n密码: peiyuning1213\nGitHub 账户: peiyuning0409（密码相同）';
+            copyText(full, '完整凭证');
+        });
+
+        // ========== 控制台提示 ==========
+        console.log('%c🛠️ 飞牛 NAS 维护面板 v2.0 已加载', 'font-size:16px; font-weight:600; color:#5b9aff;');
+        console.log('%c主账户: peiyuning  |  密码: peiyuning1213', 'font-size:13px; color:#8899bb;');
+        console.log('%cGitHub: peiyuning0409 (密码相同)', 'font-size:13px; color:#8899bb;');
+        console.log('%c📌 双击飞牛图标可快速复制完整凭证', 'font-size:12px; color:#667799;');
+        console.log('%c🌐 点击卡片打开对应控制台', 'font-size:12px; color:#667799;');
+    </script>
+
+</body>
+</html>
