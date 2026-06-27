@@ -167,7 +167,7 @@
             border-color: rgba(255, 255, 255, 0.06);
         }
 
-        /* ----- 功能网格（四卡片） ----- */
+        /* ----- 功能网格（三卡片，原为2×2，现自动适配） ----- */
         .grid-2 {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -224,9 +224,6 @@
         .card-github::before {
             background: linear-gradient(90deg, #6e7681, #30363d);
         }
-        .card-fnnas::before {
-            background: linear-gradient(90deg, #00b4d8, #0077b6);
-        }
 
         .card-top {
             display: flex;
@@ -258,10 +255,6 @@
         .card-github .card-icon {
             background: linear-gradient(145deg, #6e7681, #30363d);
             box-shadow: 0 8px 20px -6px rgba(110, 118, 129, 0.30);
-        }
-        .card-fnnas .card-icon {
-            background: linear-gradient(145deg, #00b4d8, #0077b6);
-            box-shadow: 0 8px 20px -6px rgba(0, 180, 216, 0.30);
         }
 
         .badge {
@@ -304,6 +297,19 @@
         .card-desc strong {
             color: rgba(220, 235, 255, 0.8);
             font-weight: 600;
+        }
+
+        /* 通用密码/账户备注样式（与 github-account 一致） */
+        .card-desc .account-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2px 10px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #c9d1d9;
+            margin-top: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
         }
 
         .card-desc .github-account {
@@ -488,9 +494,6 @@
         .function-card:nth-child(3) {
             animation-delay: 0.16s;
         }
-        .function-card:nth-child(4) {
-            animation-delay: 0.24s;
-        }
 
         @keyframes cardFadeUp {
             0% {
@@ -542,10 +545,10 @@
             </div>
         </div>
 
-        <!-- 四个功能卡片（2×2） -->
+        <!-- 三个功能卡片（原四个，删除了飞牛NAS穿透卡） -->
         <div class="grid-2">
 
-            <!-- 卡片 1：Cloudflare · 内网穿透 -->
+            <!-- 卡片 1：Cloudflare · 内网穿透（添加了密码备注） -->
             <a href="https://dash.cloudflare.com" target="_blank" rel="noopener noreferrer" class="function-card card-cloudflare">
                 <div class="card-top">
                     <div class="card-icon">
@@ -559,6 +562,10 @@
                 </div>
                 <div class="card-desc">
                     通过 <strong>Cloudflare Tunnel</strong> 安全暴露本地服务，无需公网 IP，实现内网穿透。
+                    <!-- 新增密码备注 -->
+                    <div class="account-badge">
+                        <i class="fas fa-key" style="margin-right: 4px;"></i> 密码：peiyuning1213!
+                    </div>
                 </div>
                 <div class="card-meta">
                     <span class="tag"><i class="fas fa-rocket"></i> 零信任接入</span>
@@ -611,27 +618,6 @@
                 <div class="card-meta">
                     <span class="tag"><i class="fas fa-code"></i> 仓库管理</span>
                     <span class="url">github.com</span>
-                </div>
-            </a>
-
-            <!-- 卡片 4：飞牛内网穿透版 NAS -->
-            <a href="https://yupan.peiyuningyupan.qzz.io/" target="_blank" rel="noopener noreferrer" class="function-card card-fnnas">
-                <div class="card-top">
-                    <div class="card-icon">
-                        <i class="fas fa-network-wired"></i>
-                    </div>
-                    <span class="badge">穿透 NAS</span>
-                </div>
-                <div class="card-title">
-                    飞牛 NAS (穿透)
-                    <i class="fas fa-arrow-up-right-from-square"></i>
-                </div>
-                <div class="card-desc">
-                    通过内网穿透访问的 <strong>飞牛 NAS</strong> 个人云盘，随时随地存取文件。
-                </div>
-                <div class="card-meta">
-                    <span class="tag"><i class="fas fa-external-link-alt"></i> 穿透访问</span>
-                    <span class="url">yupan.peiyuningyupan.qzz.io</span>
                 </div>
             </a>
 
